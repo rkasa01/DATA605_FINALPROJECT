@@ -1,0 +1,251 @@
+---
+title: "DATA605- Final Project"
+author: "Renida Kasa"
+date: "2023-12-15"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+GITHUB LINK: https://github.com/rkasa01/DATA605_FINALPROJECT/tree/main 
+
+# Problem 1
+
+## Task:
+Using R, set a random seed equal to 1234 (i.e., set.seed(1234)).  Generate a random variable X that has 10,000 continuous random uniform values between 5 and 15. Then generate a random variable Y that has 10,000 random normal values with a mean of 10 and a standard deviation of 2.89.
+
+Probability.   Calculate as a minimum the below probabilities a through c.  Assume the small letter "x" is estimated as the median of the X variable, and the small letter "y" is estimated as the median of the Y variable.  Interpret the meaning of all probabilities.
+
+### 5 points.    a.   P(X>x | X>y)		b.  P(X>x & Y>y)		c.  P(X<x | X>y)
+
+### 5 points. Investigate whether P(X>x & Y>y)=P(X>x)P(Y>y) by building a table and evaluating the marginal and joint probabilities.
+
+### 5 points. Check to see if independence holds by using Fisher’s Exact Test and the Chi Square Test.  What is the difference between the two? Which is most appropriate?  Are you surprised at the results?  Why or why not?
+
+## Setting the Seed
+```{r}
+set.seed(1234)
+```
+I first started by setting a random set equal to 1234. 
+
+## Generating Variables
+```{r}
+X <- runif(10000, min = 5, max = 15)
+Y <- rnorm(10000, mean = 10, sd = 2.89)
+```
+
+We are given that random variable X has 10,000 continuous uniform values between 5 and 15, and that 
+random variable Y has 10,000 normal values with a mean of 10 and a standard deviation of 2.89. Because of that, I generated x with 10,000 continuous uniform values with a minimum value of 5, and maximum value of 15. I also generated y with 10,000 normal values with a mean of 10 and standard deviation of 2.89
+
+```{r}
+hist(X)
+```
+For X, we see based on the histogram that there is a uniform distribution. The frequencies are all about the same, making the range relatively small. 
+
+```{r}
+hist(Y)
+```
+
+For Y, we see based on the histogram that there is a normal distribution. For this type of dataset, the median and mean are about the same. 
+
+## Calculating the Probabilities:
+
+### a. P(X>x | X>y)
+```{r}
+x <- median(X)
+y <- median(Y)
+x
+y 
+```
+
+```{r}
+A <- X[X>y]
+B <- X[X>x]
+
+probability_C <- length(A) / length(B)
+
+cat('P(X>x | X>y):', probability_C)
+```
+We are told that x and y both represent medians of their respective variables, so we can assign them to their median values. The median value of x is 10.01, and the median value of y is 10.03. This first probability represents the probability that X is greater than its median value, given that it is already greater than y. We can create a subset, A, where X is greater than y, and another, B, where X is greater than x. Here, A represents the subset of values in the variable X that are greater than the values in Y, and B represents the subset of values in X that are greater than the specific value x. X[X > y] filters the values in X that are greater than the value of y, creating a subset: A. X[X > x] filters values in X that are greater than the specific value x, forming a subset: B. Then, creating the proportion <- length(A) / length(B), calculates the proportion of values from subset A (values greater than y) within subset B (values greater than x). The probability is .9958, or about 1. 
+
+### b. P(X>x & Y>y)	
+```{r}
+probability_B <- mean(X>x & Y>y)
+
+cat('P(X>x & Y>y):', probability_B)
+```
+This second probability represents the probability that a random variable X is greater than its median and that a random variable Y is greater than its median. This helps to determine the probability that these two values are both greater than their respective medians. X > x represents the condition that checks for values in X that are greater than the median value x, whereas Y > y represents the condition that checks for values in Y that are greater than the median value y. Using the mean() function here calculates the proportion of cases where both conditions are satisfied simultaneously, compared to the total number of cases. The probability is .2507 or about .25.
+
+### c. P(X<x | X>y)
+
+```{r}
+probability_C <- mean(X<x & X>y)/mean(X>y)
+
+cat('P(X<x | X>y):', probability_C)
+```
+This third probability represents the probability that a random variable, X, is greater than y, given that X is less than its median value. It represents the likelihood that, in instances where X surpasses Y, X falls below its median.X < x represents the values in X that are less than the median value x and X > y represents the values in X that are greater than the median value y. Using the mean() function once again calculates the proportion of cases where both conditions are satisfied simultaneously, when compared to the total number of cases. The probability is 0.
+
+
+## Investigate whether P(X>x & Y>y)=P(X>x)P(Y>y) by building a table and evaluating the marginal and joint probabilities.
+```{r}
+table <- table(X>x, Y>y)
+table
+```
+
+
+For the purpose of this task, we need to build a contingency table and evaluate the marginal and joint probabilities. When looking at the joint table, we see that there are differences in the marginal probabilities when the random variable is involved, indicating that these may be independent random variables.
+
+
+## Check to see if independence holds by using Fisher’s Exact Test and the Chi Square Test.  What is the difference between the two? Which is most appropriate?  Are you surprised at the results?  Why or why not?
+
+Null hypothesis: There is no relationship between the two variables, meaning that they are independent of one another. 
+Alternative hypothesis: There is a relationship between the two variables, meaning that they are not independent of one another. 
+
+```{r}
+fisher_test <- fisher.test(table)
+fisher_test
+```
+
+The Fisher's Exact Test is used to calculate the exact probability of observing the data given the marginal totals, assuming independence. This typically works best for smaller sample sizes. In this case, the null hypothesis states that there is no relationship between the two variables, making them independent of one another. The alternative hypothesis states that there is a relationship between the two variables, making them dependent to one another. With the Fisher's Exact Test, we have a p-value of 0.8, which is insignificant. This means that we can accept the null hypothesis, and reject the alternative hypothesis. We also see that the 95% confidence interval is 0.9343 - 1.0946, providing further evidence that there is no association between the two variables. Furthermore, the odds ratio of 1 implies no association between the variables.
+
+
+```{r}
+chisq_test <- chisq.test(table)
+chisq_test
+```
+The Chi Square Test calculates the difference between the observed frequencies and the expected ones assuming independence.This works well for larger sample sizes, as it would not be as precise for smaller sample sizes. In this case, the null hypothesis states that there is no relationship between the two variables, making them independent of one another. The alternative hypothesis states that there is a relationship between the two variables, making them dependent to one another. With the Chi Square Test, we once again have a p-value of 0.8, which is insignificant. We can accept the null hypothesis, and reject the alternative hypothesis. The x-squared value measures the difference between the observed and expected frequencies, assuming independence, and a smaller value suggests that the observed counts are closer to what would be expected under independence. With the x-squared value being 0.068, this is further evidence in support of independence.
+
+# Problem 2
+
+You are to register for Kaggle.com (free) and compete in the Regression with a Crab Age Dataset competition.  https://www.kaggle.com/competitions/playground-series-s3e16  I want you to do the following:
+
+# 5 points.  Descriptive and Inferential Statistics. 
+Provide univariate descriptive statistics and appropriate plots for the training data set.  Provide a scatterplot matrix for at least two of the independent variables and the dependent variable. Derive a correlation matrix for any three quantitative variables in the dataset.  Test the hypotheses that the correlations between each pairwise set of variables is 0 and provide an 80% confidence interval.  Discuss the meaning of your analysis.  Would you be worried about familywise error? Why or why not?
+
+```{r}
+library(curl)
+test <- read.csv(curl("https://raw.githubusercontent.com/rkasa01/DATA605_FINALPROJECT/main/test.csv"))
+train <- read.csv(curl("https://raw.githubusercontent.com/rkasa01/DATA605_FINALPROJECT/main/train.csv"))
+```
+
+## Descriptive Statistics
+```{r}
+str(test)
+str(train)
+summary(train)
+```
+
+## Scatterplot Matrix
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+train %>%
+  gather(-id,-Age, key="var", value="value") %>%
+  ggplot(aes(x=value,y=Age))+
+  geom_point() +
+  geom_smooth(method="lm",color="red") +
+  facet_wrap(~ var, scales="free") +
+  theme_bw()+
+  ggtitle("Scatterplot Matrix")  
+```
+
+## Analysis
+```{r}
+corr_mat <- cor(train[, c("Diameter", "Height", "Age")])
+corr_mat
+```
+```{r}
+corr_hyptest_a <- cor.test(train$Diameter, train$Height, conf.level = 0.80)
+corr_hyptest_b <- cor.test(train$Diameter, train$Age, conf.level = 0.80)
+corr_hyptest_c <- cor.test(train$Height, train$Age, conf.level = 0.80)
+corr_hyptest_a
+```
+
+## Discussion
+
+The calculated sample Pearson's correlation coefficient between 'Diameter' and 'Height' is 0.9214. The t-value is 645, and the degrees of freedom are 74049. The reported p-value is <2e-16, making it significant. This indicates strong evidence against the null hypothesis that there is no relationship between 'Diameter' and 'Height'. The 80% confidence interval means that we can be 80% confident that the true correlation between 'Diameter' and 'Height' lies within the reported range: 0.9206 - 0.9221.
+
+# 5 points. Linear Algebra and Correlation.  
+Invert your correlation matrix from above. (This is known as the precision matrix and contains variance inflation factors on the diagonal.) Multiply the correlation matrix by the precision matrix, and then multiply the precision matrix by the correlation matrix. Conduct LDU decomposition on the matrix.  
+
+## Inverting the Correlation Matrix 
+```{r}
+inv_corr_mat <- solve(corr_mat)  
+print(inv_corr_mat)
+```
+## Matrix Multiplication
+```{r}
+prod_corr_prec <- corr_mat %*% inv_corr_mat
+
+prod_prec_corr <- inv_corr_mat %*% corr_mat
+
+print(prod_corr_prec)
+print(prod_prec_corr)
+```
+
+## LDU Decomposition
+```{r}
+ldu_decomp <- La.svd(inv_corr_mat)
+L <- ldu_decomp$u %*% diag(ldu_decomp$d)   
+D <- diag(ldu_decomp$d)   
+U <- t(ldu_decomp$u)   
+
+print(L)
+print(D)
+print(U)
+```
+
+# 5 points.  Calculus-Based Probability & Statistics.  
+Many times, it makes sense to fit a closed form distribution to data.  Select a variable in the Kaggle.com training dataset that is skewed to the right, shift it so that the minimum value is absolutely above zero if necessary.  Then load the MASS package and run fitdistr to fit an exponential probability density function.  (See https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/fitdistr.html ).  Find the optimal value of lambda for this distribution, and then take 1000 samples from this exponential distribution using this value (e.g., rexp(1000, lamda)).  Plot a histogram and compare it with a histogram of your original variable. Using the exponential pdf, find the 5th and 95th percentiles using the cumulative distribution function (CDF). Also generate a 95% confidence interval from the empirical data, assuming normality.  Finally, provide the empirical 5th percentile and 95th percentile of the data.  Discuss.
+
+```{r}
+library (fitdistrplus)
+
+skewed <- train$Length
+exponential_dist <- fitdistr(skewed, "exponential")
+lambda <- exponential_dist$estimate["rate"]
+samples_1000 <- rexp(1000, rate = lambda) #taking 1000 samples
+
+hist(train$Length, probability = TRUE)
+hist(samples_1000, main = "Exponential Distribution", probability = TRUE)
+```
+## 5th and 95th Percentiles from Cumulative Distribution Function
+
+```{r}
+percentile_5_exp_pdf <- qexp(0.05, rate = lambda)
+percentile_5_exp_pdf
+percentile_95_exp_pdf <- qexp(0.95, rate = lambda)
+percentile_95_exp_pdf
+```
+
+## Generate 95% Confidence Interval from Empirical Data
+```{r}
+confidence_interval <- t.test(skewed)$conf.int
+
+empirical_percentiles <- quantile(skewed, probs = c(0.05, 0.95))
+empirical_percentiles
+```
+
+Based on the 5th and 95th percentiles obtained from the exponential PDF and those obtained from the empirical percentiles, the interval for the empirical data were more precise due to the smaller range. 
+
+10 points.  Modeling.  Build some type of multiple regression  model and submit your model to the competition board.  Provide your complete model summary and results with analysis.  Report your Kaggle.com user name and score.
+
+```{r}
+lm_model <- lm(Age ~ ., data = train)
+lm_model<- step(lm_model, direction = c("backward"))
+```
+
+```{r}
+plot(residuals(lm_model))
+```
+```{r}
+par(mfrow = c(2, 2))
+
+plot(lm_model)
+```
+
+
+ 
+
